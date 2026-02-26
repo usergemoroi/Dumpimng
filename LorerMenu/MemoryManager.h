@@ -3,8 +3,8 @@
 #include <windows.h>
 #include <vector>
 #include <string>
-#include <Psapi.h>
-#include <TlHelp32.h>
+#include <psapi.h>
+#include <tlhelp32.h>
 
 #pragma comment(lib, "psapi.lib")
 
