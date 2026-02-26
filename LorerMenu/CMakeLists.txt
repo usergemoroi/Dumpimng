@@ -5,13 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Build options
-option(BUILD_DEMO "Build standalone demo application" OFF)
-option(BUILD_DLL "Build main DLL for injection" ON)
-
-# Find DirectX
-find_path(DIRECTX_INCLUDE_DIRS NAMES d3d11.h 
-    PATHS "C:/Program Files (x86)/Windows Kits/10/Include/*/um"
-    DOC "DirectX include directory")
+option(BUILD_LOADER "Build loader executable" ON)
+option(BUILD_DLL "Build cheat DLL" ON)
+option(BUILD_DEMO "Build standalone demo" OFF)
 
 # ImGui source files
 set(IMGUI_DIR "${CMAKE_SOURCE_DIR}/external/imgui" CACHE PATH "Path to ImGui directory")
@@ -25,20 +21,20 @@ set(IMGUI_SOURCES
     ${IMGUI_DIR}/backends/imgui_impl_win32.cpp
 )
 
-# Core source files
+# Core source files (shared)
 set(CORE_SOURCES
-    LorerMenu/LorerMenu.cpp
-    LorerMenu/MemoryManager.cpp
-    LorerMenu/CheatFeatures.cpp
+    ${CMAKE_SOURCE_DIR}/LorerMenu/LorerMenu.cpp
+    ${CMAKE_SOURCE_DIR}/LorerMenu/MemoryManager.cpp
+    ${CMAKE_SOURCE_DIR}/LorerMenu/CheatFeatures.cpp
 )
 
 set(CORE_HEADERS
-    LorerMenu/LorerMenu.h
-    LorerMenu/LorerOverlay.h
-    LorerMenu/LorerIntegration.h
-    LorerMenu/Offsets.h
-    LorerMenu/MemoryManager.h
-    LorerMenu/CheatFeatures.h
+    ${CMAKE_SOURCE_DIR}/LorerMenu/LorerMenu.h
+    ${CMAKE_SOURCE_DIR}/LorerMenu/LorerOverlay.h
+    ${CMAKE_SOURCE_DIR}/LorerMenu/LorerIntegration.h
+    ${CMAKE_SOURCE_DIR}/LorerMenu/Offsets.h
+    ${CMAKE_SOURCE_DIR}/LorerMenu/MemoryManager.h
+    ${CMAKE_SOURCE_DIR}/LorerMenu/CheatFeatures.h
 )
 
 # Common include directories
@@ -48,34 +44,42 @@ set(CORE_INCLUDE_DIRS
     ${IMGUI_DIR}/backends
 )
 
-# Core library (static)
-add_library(LorerCore STATIC
-    ${CORE_SOURCES}
-    ${IMGUI_SOURCES}
-)
+# Common libraries
+set(WIN_LIBS d3d11 dxgi user32 gdi32 psapi advapi32 shlwapi)
 
-target_include_directories(LorerCore PUBLIC
-    ${CORE_INCLUDE_DIRS}
-)
+# ============================================================
+# Loader Executable (Loader.exe)
+# ============================================================
+if(BUILD_LOADER)
+    add_executable(Loader WIN32
+        ${CMAKE_SOURCE_DIR}/LorerMenu/Loader/Loader.cpp
+    )
+    
+    target_include_directories(Loader PRIVATE
+        ${CORE_INCLUDE_DIRS}
+    )
+    
+    target_link_libraries(Loader PRIVATE
+        ${WIN_LIBS}
+    )
+    
+    target_compile_definitions(Loader PRIVATE
+        UNICODE
+        _UNICODE
+        _CRT_SECURE_NO_WARNINGS
+    )
+    
+    set_target_properties(Loader PROPERTIES
+        OUTPUT_NAME "Loader"
+    )
+endif()
 
-target_link_libraries(LorerCore PUBLIC
-    d3d11
-    dxgi
-    user32
-    gdi32
-    psapi
-)
-
-target_compile_definitions(LorerCore PRIVATE
-    UNICODE
-    _UNICODE
-    _CRT_SECURE_NO_WARNINGS
-)
-
-# Main DLL for injection
+# ============================================================
+# Main Cheat DLL (Lorer.dll)
+# ============================================================
 if(BUILD_DLL)
     add_library(LorerDLL SHARED
-        LorerMenu/DllMain.cpp
+        ${CMAKE_SOURCE_DIR}/LorerMenu/DllMain.cpp
         ${CORE_SOURCES}
         ${IMGUI_SOURCES}
     )
@@ -85,11 +89,7 @@ if(BUILD_DLL)
     )
     
     target_link_libraries(LorerDLL PRIVATE
-        d3d11
-        dxgi
-        user32
-        gdi32
-        psapi
+        ${WIN_LIBS}
     )
     
     # MinHook integration
@@ -113,13 +113,16 @@ if(BUILD_DLL)
     set_target_properties(LorerDLL PROPERTIES
         OUTPUT_NAME "Lorer"
         PREFIX ""
+        SUFFIX ".dll"
     )
 endif()
 
-# Standalone demo
+# ============================================================
+# Standalone Demo (for testing menu without game)
+# ============================================================
 if(BUILD_DEMO)
     add_executable(LorerDemo WIN32
-        LorerMenu/LorerDemo.cpp
+        ${CMAKE_SOURCE_DIR}/LorerMenu/LorerDemo.cpp
         ${CORE_SOURCES}
         ${IMGUI_SOURCES}
     )
@@ -129,11 +132,7 @@ if(BUILD_DEMO)
     )
     
     target_link_libraries(LorerDemo PRIVATE
-        d3d11
-        dxgi
-        user32
-        gdi32
-        psapi
+        ${WIN_LIBS}
     )
     
     target_compile_definitions(LorerDemo PRIVATE
@@ -143,9 +142,33 @@ if(BUILD_DEMO)
     )
 endif()
 
-# Compiler-specific options
+# ============================================================
+# Core Static Library (for reuse)
+# ============================================================
+add_library(LorerCore STATIC
+    ${CORE_SOURCES}
+    ${IMGUI_SOURCES}
+)
+
+target_include_directories(LorerCore PUBLIC
+    ${CORE_INCLUDE_DIRS}
+)
+
+target_link_libraries(LorerCore PUBLIC
+    ${WIN_LIBS}
+)
+
+target_compile_definitions(LorerCore PRIVATE
+    UNICODE
+    _UNICODE
+    _CRT_SECURE_NO_WARNINGS
+)
+
+# ============================================================
+# Compiler Options
+# ============================================================
 if(MSVC)
-    add_compile_options(/W4 /utf-8)
+    add_compile_options(/W4 /utf-8 /EHsc)
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         add_compile_options(/O2 /GL)
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG")
@@ -154,12 +177,29 @@ else()
     add_compile_options(-Wall -Wextra)
 endif()
 
-# Install rules
-install(TARGETS LorerCore
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
+# ============================================================
+# Install Rules
+# ============================================================
+install(TARGETS Loader LorerDLL
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION bin
 )
 
 install(FILES ${CORE_HEADERS}
     DESTINATION include/LorerMenu
 )
+
+# ============================================================
+# Build Info
+# ============================================================
+message(STATUS "")
+message(STATUS "========================================")
+message(STATUS "Lorer Build Configuration")
+message(STATUS "========================================")
+message(STATUS "Build Loader: ${BUILD_LOADER}")
+message(STATUS "Build DLL:    ${BUILD_DLL}")
+message(STATUS "Build Demo:   ${BUILD_DEMO}")
+message(STATUS "ImGui Dir:    ${IMGUI_DIR}")
+message(STATUS "MinHook Dir:  ${MINHOOK_DIR}")
+message(STATUS "========================================")
+message(STATUS "")
