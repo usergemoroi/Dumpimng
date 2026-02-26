@@ -46,7 +46,7 @@ namespace Utils {
 
         TOKEN_PRIVILEGES tp;
         LUID luid;
-        if (!LookupPrivilegeValueW(nullptr, SE_DEBUG_NAME, &luid)) {
+        if (!LookupPrivilegeValueW(nullptr, L"SeDebugPrivilege", &luid)) {
             CloseHandle(hToken);
             return false;
         }

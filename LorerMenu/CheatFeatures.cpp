@@ -143,7 +143,7 @@ void CheatFeatures::RenderPlayerESP(ImDrawList* drawList, const GameStructs::Pla
         // Health
         float healthGreen = healthPercent * 255.0f;
         float healthRed = (1.0f - healthPercent) * 255.0f;
-        ImU32 healthColor = ImColor(healthRed, healthGreen, 0, 255);
+        ImU32 healthColor = ImColor((int)healthRed, (int)healthGreen, 0, 255);
         
         drawList->AddRectFilled(
             ImVec2(boxLeft - healthBarWidth - 2, boxTop + healthBarHeight * (1.0f - healthPercent)),

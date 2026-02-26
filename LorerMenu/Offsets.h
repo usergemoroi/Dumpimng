@@ -1,5 +1,7 @@
 #pragma once
 #include <cstdint>
+#include <cmath>
+#include <string>
 
 namespace Offsets {
     // Standoff 2 v0.37.1 - Memory Offsets
