@@ -1,177 +1,143 @@
 # Lorer - Standoff 2 Cheat Framework
 
-A comprehensive game modification framework for Standoff 2 (v0.37.1) running on BlueStacks 5 emulator.
+Полный фреймворк для модификации игры Standoff 2 (v0.37.1) на эмуляторе BlueStacks 5.
 
-## Features
-
-### Aimbot
-- **Enable/Disable** - Toggle aimbot functionality
-- **FOV Control** - Adjustable field of view (0-360°)
-- **Smoothness** - Human-like aim movement
-- **Target Bone** - Head, Neck, Chest, Stomach
-- **Visible Check** - Only target visible enemies
-- **Silent Aim** - Stealthy targeting
-- **FOV Circle** - Visual indicator for aimbot range
-
-### Visuals (ESP)
-- **Box ESP** - Bounding boxes around players
-- **Health Bar** - Visual health indicator
-- **Name ESP** - Player names
-- **Distance ESP** - Distance in meters
-- **Skeleton ESP** - Player skeleton outline
-- **Snaplines** - Lines from screen to players
-- **Head Dot** - Indicator on head position
-- **Weapon ESP** - Current ammo display
-- **Color Customization** - Enemy, Team, Visible colors
-
-### Misc Features
-- **Bunny Hop** - Automatic jumping
-- **No Flash** - Remove flashbang effect
-- **FOV Changer** - Custom field of view
-- **Fake Lag** - Network manipulation
-- **Auto Strafe** - Automatic strafing
-
-### Settings
-- **Menu Hotkey** - INSERT/HOME/END/F1
-- **Stream Proof** - Hide from screen capture
-- **Auto-Update Offsets** - Automatic offset updates
-- **Config System** - Save/Load configurations
-
-## Memory Offsets (Standoff 2 v0.37.1)
-
-```cpp
-// GameManager
-constexpr uintptr_t GameManager_StaticInstance = 0x18;
-
-// PlayerManager
-constexpr uintptr_t PlayerManager_StaticInstance = 0x18;
-constexpr uintptr_t PlayerManager_LocalPlayer = 0x68;
-constexpr uintptr_t PlayerManager_PlayerList = 0x38;
-
-// PlayerController
-constexpr uintptr_t PlayerController_Health = 0x150;
-constexpr uintptr_t PlayerController_Team = 0x154;
-constexpr uintptr_t PlayerController_MovementController = 0x98;
-constexpr uintptr_t PlayerController_IsVisible = 0x1A0;
-
-// MovementController
-constexpr uintptr_t MovementController_TranslationData = 0xB0;
-
-// TranslationData
-constexpr uintptr_t TranslationData_Position = 0x1C;
-```
-
-## Project Structure
+## Структура проекта
 
 ```
 LorerMenu/
-├── DllMain.cpp           # DLL entry point with DirectX hooks
-├── MemoryManager.h/cpp   # Memory operations and game data access
-├── CheatFeatures.h/cpp   # Aimbot, ESP, and other cheat features
-├── LorerMenu.h/cpp       # ImGui menu implementation
-├── LorerOverlay.h        # Overlay management
-├── LorerIntegration.h    # Integration utilities
-├── Offsets.h             # Game memory offsets
-├── CMakeLists.txt        # Build configuration
-└── README.md             # This file
+├── Loader/
+│   └── Loader.cpp        # Загрузчик (Injector)
+├── DllMain.cpp           # Точка входа DLL
+├── MemoryManager.cpp/h   # Работа с памятью
+├── CheatFeatures.cpp/h   # Функции чита
+├── LorerMenu.cpp/h       # ImGui меню
+├── Offsets.h             # Офсеты игры
+├── CMakeLists.txt        # Конфигурация сборки
+├── build.bat             # Скрипт сборки
+└── external/             # Внешние библиотеки
+    ├── imgui/            # ImGui (нужно скачать)
+    └── minhook/          # MinHook (нужно скачать)
 ```
 
-## Building
+## Результат сборки
 
-### Prerequisites
+| Файл | Описание |
+|------|----------|
+| **Loader.exe** | Загрузчик для внедрения DLL |
+| **Lorer.dll** | Основной модуль с функциями |
 
-- CMake 3.16+
-- Visual Studio 2022 (MSVC)
-- Windows 10/11 SDK
-- DirectX 11 SDK
+## Быстрая сборка
 
-### Dependencies
+### 1. Скачайте зависимости
 
-1. **ImGui** - Download from https://github.com/ocornut/imgui
-   - Extract to `external/imgui/`
-   - Use docking branch for best results
+**ImGui:**
+```
+https://github.com/ocornut/imgui
+-> Извлечь в external/imgui/
+```
 
-2. **MinHook** - Download from https://github.com/TsudaKageyu/minhook
-   - Extract to `external/minhook/`
-   - Required for DirectX hooking
+**MinHook:**
+```
+https://github.com/TsudaKageyu/minhook/releases
+-> Извлечь в external/minhook/
+```
 
-### Build Commands
+### 2. Соберите проект
 
-```bash
-mkdir build
-cd build
-cmake .. -DBUILD_DLL=ON -DBUILD_DEMO=OFF
+```batch
+# Windows
+build.bat
+
+# Или вручную через CMake
+mkdir build && cd build
+cmake .. -G "Visual Studio 17 2022" -A x64
 cmake --build . --config Release
 ```
 
-Output: `Lorer.dll` for injection into HD-Player.exe
+### 3. Результат
 
-## Usage
+После сборки в корне появятся:
+- `Loader.exe` - загрузчик
+- `Lorer.dll` - DLL с читом
 
-### Injection
+## Использование
 
-1. Start BlueStacks 5
-2. Launch Standoff 2
-3. Use a DLL injector to inject `Lorer.dll` into `HD-Player.exe`
-4. Press **INSERT** to toggle the menu
+1. Запустите **BlueStacks 5**
+2. Запустите **Standoff 2**
+3. Запустите **Loader.exe** от имени администратора
+4. Нажмите **INSERT** для открытия меню
 
-### Menu Navigation
+## Функции
 
-- **INSERT** - Toggle menu visibility
-- **Mouse** - Navigate and interact with menu
-- **Left Click** - Toggle options, drag sliders
+### Aimbot
+- Включение/выключение
+- Настройка FOV (0-360°)
+- Плавность прицеливания
+- Выбор кости (Head, Neck, Chest, Stomach)
+- Проверка видимости
+- Silent Aim
+- Отрисовка FOV круга
 
-### Configuration
+### Visuals (ESP)
+- Box ESP
+- Health Bar
+- Name ESP
+- Distance ESP
+- Skeleton ESP
+- Snaplines
+- Head Dot
+- Weapon ESP
+- Настройка цветов
 
-Configurations are stored in the same directory as the DLL. Use the Settings tab to save/load configurations.
+### Misc
+- Bunny Hop
+- No Flash
+- FOV Changer
+- Fake Lag
+- Auto Strafe
 
-## Technical Details
+## Офсеты (Standoff 2 v0.37.1)
 
-### DirectX 11 Hooking
+```cpp
+// GameManager
+GameManager_StaticInstance = 0x18
 
-The framework hooks `IDXGISwapChain::Present` to render the ImGui overlay. This is done by:
+// PlayerManager
+PlayerManager_StaticInstance = 0x18
+PlayerManager_LocalPlayer = 0x68
+PlayerManager_PlayerList = 0x38
 
-1. Creating a temporary swap chain
-2. Getting the Present function address from the vtable
-3. Using MinHook to create a detour
-4. Rendering ImGui before calling the original Present
+// PlayerController
+PlayerController_Health = 0x150
+PlayerController_Team = 0x154
+PlayerController_MovementController = 0x98
+PlayerController_IsVisible = 0x1A0
 
-### Memory Access
+// MovementController
+MovementController_TranslationData = 0xB0
 
-Memory is accessed through standard Windows APIs:
-- `ReadProcessMemory` for reading game data
-- `WriteProcessMemory` for modifying game data
-- Pattern scanning for dynamic address resolution
+// TranslationData
+TranslationData_Position = 0x1C
+```
 
-### ESP Rendering
+## Технические детали
 
-ESP is rendered using ImGui's background draw list, which allows drawing on top of the game without interfering with the rendering pipeline.
+- **Графика:** DirectX 11
+- **Хуки:** MinHook (Present hook)
+- **UI:** ImGui
+- **Платформа:** Windows x64
+- **Цель:** HD-Player.exe (BlueStacks 5)
 
-## Anti-Detection
+## Системные требования
 
-The framework includes several anti-detection measures:
-
-1. **String Obfuscation** - Encrypted strings
-2. **Random Delays** - Human-like timing
-3. **Memory Protection** - VirtualProtect usage
-4. **Stream Proof** - Optional screen capture avoidance
-
-## Disclaimer
-
-This software is provided for **educational and research purposes only**. Using game modifications in online games may violate the terms of service and result in account bans. The authors are not responsible for any misuse of this software.
-
-## Credits
-
-- ImGui by Omar Cornut
-- MinHook by Tsuda Kageyu
-- Game reverse engineering community
-
-## License
-
-This project is for educational purposes. Use at your own risk.
+- Windows 10/11
+- Visual Studio 2019/2022
+- CMake 3.16+
+- DirectX 11 SDK
 
 ---
 
-**Version:** 1.0.0  
-**Target:** Standoff 2 v0.37.1  
-**Platform:** BlueStacks 5 (Windows)
+**Версия:** 1.0.0  
+**Цель:** Standoff 2 v0.37.1  
+**Платформа:** BlueStacks 5 (Windows)
