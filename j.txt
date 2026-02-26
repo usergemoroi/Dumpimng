@@ -633,5 +633,638 @@ void CheatLogic::Render(OverlayRenderer* pRenderer) {
 8. Модификация времени выполнения (Runtime Patching): Инструмент, который в реальном времени патчит инструкции в памяти libunity.so только на время выполнения определенных функций (например, функции рендеринга стен), возвращая оригинальный код после выполнения.
 9. Использование легальных API для людей с ограниченными возможностями: Некоторые игры и ОС предоставляют API для ассистивных технологий. Теоретически можно использовать их для чтения игрового состояния и эмуляции ввода, хотя это противоречит духу данных API.
 10. Полностью легальный подход (Тренировка с ботом): Создание автономного бота, который играет на выделенном сервере или в тренировочном режиме для оттачивания навыков игрока. Не дает преимущества в соревновательной игре, но полезен для тренировки.
-создай красивое меню с названием Lorer включением и выключение функций красивое меню 
-// // 
+
+6. Меню Lorer - Реализация интерфейса
+
+6.1. Заголовочный файл стилей Lorer (LorerStyle.h)
+
+```cpp
+#pragma once
+#include <imgui.h>
+#include <imgui_internal.h>
+
+namespace LorerStyle {
+    struct ThemeColors {
+        ImVec4 Background;
+        ImVec4 Header;
+        ImVec4 Accent;
+        ImVec4 Text;
+        ImVec4 TextDimmed;
+        ImVec4 Border;
+        ImVec4 Button;
+        ImVec4 ButtonHover;
+        ImVec4 ButtonActive;
+        ImVec4 ToggleOn;
+        ImVec4 ToggleOff;
+        ImVec4 FrameBg;
+        ImVec4 FrameBgHovered;
+        ImVec4 FrameBgActive;
+        ImVec4 SliderGrab;
+        ImVec4 SliderGrabActive;
+        ImVec4 CheckMark;
+        ImVec4 Tab;
+        ImVec4 TabHovered;
+        ImVec4 TabActive;
+    };
+
+    inline ThemeColors GetDefaultTheme() {
+        ThemeColors theme;
+        theme.Background = ImColor(15, 15, 20, 255);
+        theme.Header = ImColor(25, 25, 35, 255);
+        theme.Accent = ImColor(138, 43, 226, 255);
+        theme.Text = ImColor(240, 240, 240, 255);
+        theme.TextDimmed = ImColor(150, 150, 150, 255);
+        theme.Border = ImColor(50, 50, 65, 255);
+        theme.Button = ImColor(40, 40, 55, 255);
+        theme.ButtonHover = ImColor(60, 60, 80, 255);
+        theme.ButtonActive = ImColor(138, 43, 226, 255);
+        theme.ToggleOn = ImColor(138, 43, 226, 255);
+        theme.ToggleOff = ImColor(60, 60, 70, 255);
+        theme.FrameBg = ImColor(30, 30, 40, 255);
+        theme.FrameBgHovered = ImColor(45, 45, 60, 255);
+        theme.FrameBgActive = ImColor(55, 55, 75, 255);
+        theme.SliderGrab = ImColor(138, 43, 226, 255);
+        theme.SliderGrabActive = ImColor(160, 70, 250, 255);
+        theme.CheckMark = ImColor(138, 43, 226, 255);
+        theme.Tab = ImColor(30, 30, 40, 255);
+        theme.TabHovered = ImColor(50, 50, 70, 255);
+        theme.TabActive = ImColor(138, 43, 226, 255);
+        return theme;
+    }
+
+    inline void ApplyTheme(const ThemeColors& theme) {
+        ImGuiStyle& style = ImGui::GetStyle();
+        ImVec4* colors = style.Colors;
+
+        colors[ImGuiCol_WindowBg] = theme.Background;
+        colors[ImGuiCol_ChildBg] = theme.Header;
+        colors[ImGuiCol_Border] = theme.Border;
+        colors[ImGuiCol_BorderShadow] = ImVec4(0, 0, 0, 0);
+        colors[ImGuiCol_FrameBg] = theme.FrameBg;
+        colors[ImGuiCol_FrameBgHovered] = theme.FrameBgHovered;
+        colors[ImGuiCol_FrameBgActive] = theme.FrameBgActive;
+        colors[ImGuiCol_TitleBg] = theme.Header;
+        colors[ImGuiCol_TitleBgActive] = theme.Accent;
+        colors[ImGuiCol_TitleBgCollapsed] = theme.Header;
+        colors[ImGuiCol_MenuBarBg] = theme.Header;
+        colors[ImGuiCol_ScrollbarBg] = theme.FrameBg;
+        colors[ImGuiCol_ScrollbarGrab] = theme.Accent;
+        colors[ImGuiCol_ScrollbarGrabHovered] = theme.ButtonHover;
+        colors[ImGuiCol_ScrollbarGrabActive] = theme.ButtonActive;
+        colors[ImGuiCol_CheckMark] = theme.CheckMark;
+        colors[ImGuiCol_SliderGrab] = theme.SliderGrab;
+        colors[ImGuiCol_SliderGrabActive] = theme.SliderGrabActive;
+        colors[ImGuiCol_Button] = theme.Button;
+        colors[ImGuiCol_ButtonHovered] = theme.ButtonHover;
+        colors[ImGuiCol_ButtonActive] = theme.ButtonActive;
+        colors[ImGuiCol_Header] = theme.Button;
+        colors[ImGuiCol_HeaderHovered] = theme.ButtonHover;
+        colors[ImGuiCol_HeaderActive] = theme.ButtonActive;
+        colors[ImGuiCol_Separator] = theme.Border;
+        colors[ImGuiCol_SeparatorHovered] = theme.Accent;
+        colors[ImGuiCol_SeparatorActive] = theme.Accent;
+        colors[ImGuiCol_ResizeGrip] = theme.Accent;
+        colors[ImGuiCol_ResizeGripHovered] = theme.ButtonHover;
+        colors[ImGuiCol_ResizeGripActive] = theme.ButtonActive;
+        colors[ImGuiCol_Tab] = theme.Tab;
+        colors[ImGuiCol_TabHovered] = theme.TabHovered;
+        colors[ImGuiCol_TabActive] = theme.TabActive;
+        colors[ImGuiCol_TabUnfocused] = theme.Tab;
+        colors[ImGuiCol_TabUnfocusedActive] = theme.Tab;
+        colors[ImGuiCol_Text] = theme.Text;
+        colors[ImGuiCol_TextDisabled] = theme.TextDimmed;
+
+        style.WindowRounding = 8.0f;
+        style.ChildRounding = 6.0f;
+        style.FrameRounding = 6.0f;
+        style.GrabRounding = 6.0f;
+        style.PopupRounding = 6.0f;
+        style.ScrollbarRounding = 6.0f;
+        style.TabRounding = 6.0f;
+        style.WindowBorderSize = 1.0f;
+        style.FrameBorderSize = 0.0f;
+        style.PopupBorderSize = 1.0f;
+        style.WindowPadding = ImVec2(12, 12);
+        style.FramePadding = ImVec2(10, 6);
+        style.ItemSpacing = ImVec2(8, 8);
+        style.ItemInnerSpacing = ImVec2(8, 6);
+    }
+}
+```
+
+6.2. Структура функций Lorer (LorerFeatures.h)
+
+```cpp
+#pragma once
+
+struct LorerAimbotConfig {
+    bool Enabled = false;
+    float FOV = 90.0f;
+    float Smoothness = 5.0f;
+    int TargetBone = 0;
+    bool VisibleCheck = true;
+    bool AutoFire = false;
+    float MaxDistance = 200.0f;
+};
+
+struct LorerVisualsConfig {
+    bool BoxESP = false;
+    bool SkeletonESP = false;
+    bool HealthESP = true;
+    bool NameESP = false;
+    bool DistanceESP = true;
+    bool Snaplines = false;
+    bool Radar = false;
+    bool Chams = false;
+    bool NightMode = false;
+    float ESPDistance = 300.0f;
+};
+
+struct LorerMiscConfig {
+    bool BunnyHop = false;
+    bool AutoStrafe = false;
+    bool NoFlash = false;
+    bool NoRecoil = false;
+    bool RapidFire = false;
+    bool InfiniteAmmo = false;
+    bool SpeedHack = false;
+    float SpeedMultiplier = 1.0f;
+    bool GodMode = false;
+};
+
+struct LorerWeaponConfig {
+    bool InstantHit = false;
+    bool NoSpread = false;
+    bool NoSway = false;
+    bool AutoAim = false;
+    float DamageMultiplier = 1.0f;
+    bool InfiniteRange = false;
+};
+
+struct LorerConfig {
+    LorerAimbotConfig Aimbot;
+    LorerVisualsConfig Visuals;
+    LorerMiscConfig Misc;
+    LorerWeaponConfig Weapon;
+    bool MenuVisible = true;
+    int MenuKey = VK_INSERT;
+};
+```
+
+6.3. Основной класс меню Lorer (LorerMenu.h / .cpp)
+
+```cpp
+// LorerMenu.h
+#pragma once
+#include <imgui.h>
+#include "LorerStyle.h"
+#include "LorerFeatures.h"
+
+class LorerMenu {
+public:
+    LorerMenu();
+    ~LorerMenu();
+
+    void Initialize();
+    void Render();
+    void Shutdown();
+    void ToggleMenu();
+    bool IsMenuVisible() const;
+    LorerConfig& GetConfig();
+
+private:
+    LorerConfig m_Config;
+    bool m_Initialized = false;
+    int m_CurrentTab = 0;
+    float m_MenuAlpha = 1.0f;
+
+    void RenderHeader();
+    void RenderTabs();
+    void RenderAimbotTab();
+    void RenderVisualsTab();
+    void RenderMiscTab();
+    void RenderWeaponTab();
+    void RenderSettingsTab();
+    
+    void RenderToggle(const char* label, bool* value, const char* tooltip = nullptr);
+    void RenderSliderFloat(const char* label, float* value, float min, float max, const char* format = "%.1f");
+    void RenderSliderInt(const char* label, int* value, int min, int max);
+    void RenderCombo(const char* label, int* current_item, const char* items);
+    void RenderColorPicker(const char* label, float* color);
+    void RenderSection(const char* title);
+    void RenderSeparator();
+};
+```
+
+```cpp
+// LorerMenu.cpp
+#include "LorerMenu.h"
+#include <imgui_internal.h>
+
+LorerMenu::LorerMenu() {}
+
+LorerMenu::~LorerMenu() {}
+
+void LorerMenu::Initialize() {
+    if (m_Initialized) return;
+    
+    LorerStyle::ApplyTheme(LorerStyle::GetDefaultTheme());
+    m_Initialized = true;
+}
+
+void LorerMenu::Shutdown() {
+    m_Initialized = false;
+}
+
+void LorerMenu::ToggleMenu() {
+    m_Config.MenuVisible = !m_Config.MenuVisible;
+}
+
+bool LorerMenu::IsMenuVisible() const {
+    return m_Config.MenuVisible;
+}
+
+LorerConfig& LorerMenu::GetConfig() {
+    return m_Config;
+}
+
+void LorerMenu::RenderHeader() {
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImVec2 pos = ImGui::GetWindowPos();
+    ImVec2 size = ImGui::GetWindowSize();
+    
+    // Градиентный заголовок
+    ImColor color1(138, 43, 226, 255);
+    ImColor color2(75, 0, 130, 255);
+    
+    drawList->AddRectFilledMultiColor(
+        pos,
+        ImVec2(pos.x + size.x, pos.y + 60),
+        color1, color1, color2, color2
+    );
+    
+    // Логотип Lorer
+    ImGui::SetCursorPos(ImVec2(15, 15));
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+    ImGui::TextColored(ImVec4(1, 1, 1, 1), "LORER");
+    ImGui::PopFont();
+    
+    ImGui::SetCursorPos(ImVec2(80, 22));
+    ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1), "Premium");
+    
+    // Кнопка закрытия
+    ImGui::SetCursorPos(ImVec2(size.x - 35, 18));
+    if (ImGui::Button("X", ImVec2(20, 24))) {
+        m_Config.MenuVisible = false;
+    }
+    
+    ImGui::Dummy(ImVec2(0, 50));
+}
+
+void LorerMenu::RenderTabs() {
+    const char* tabs[] = { "Aimbot", "Visuals", "Misc", "Weapon", "Settings" };
+    int tabCount = IM_ARRAYSIZE(tabs);
+    
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20, 10));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 0));
+    
+    for (int i = 0; i < tabCount; i++) {
+        bool isActive = (m_CurrentTab == i);
+        
+        if (isActive) {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_TabActive));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_TabActive));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_TabActive));
+        } else {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_Tab));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyleColorVec4(ImGuiCol_TabHovered));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyleColorVec4(ImGuiCol_Tab));
+        }
+        
+        if (ImGui::Button(tabs[i], ImVec2(90, 0))) {
+            m_CurrentTab = i;
+        }
+        
+        ImGui::PopStyleColor(3);
+        
+        if (i < tabCount - 1) {
+            ImGui::SameLine();
+        }
+    }
+    
+    ImGui::PopStyleVar(2);
+    ImGui::Dummy(ImVec2(0, 10));
+    ImGui::Separator();
+    ImGui::Dummy(ImVec2(0, 10));
+}
+
+void LorerMenu::RenderToggle(const char* label, bool* value, const char* tooltip) {
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, *value ? 
+        ImColor(138, 43, 226, 255) : ImColor(60, 60, 70, 255));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, *value ? 
+        ImColor(160, 70, 250, 255) : ImColor(80, 80, 90, 255));
+    
+    ImGui::Checkbox(label, value);
+    
+    ImGui::PopStyleColor(2);
+    
+    if (tooltip && ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("%s", tooltip);
+    }
+}
+
+void LorerMenu::RenderSliderFloat(const char* label, float* value, float min, float max, const char* format) {
+    ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImColor(138, 43, 226, 255));
+    ImGui::SliderFloat(label, value, min, max, format);
+    ImGui::PopStyleColor();
+}
+
+void LorerMenu::RenderSliderInt(const char* label, int* value, int min, int max) {
+    ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImColor(138, 43, 226, 255));
+    ImGui::SliderInt(label, value, min, max);
+    ImGui::PopStyleColor();
+}
+
+void LorerMenu::RenderSection(const char* title) {
+    ImGui::Dummy(ImVec2(0, 10));
+    ImGui::TextColored(ImColor(138, 43, 226, 255), "%s", title);
+    ImGui::Separator();
+    ImGui::Dummy(ImVec2(0, 5));
+}
+
+void LorerMenu::RenderSeparator() {
+    ImGui::Dummy(ImVec2(0, 8));
+    ImGui::Separator();
+    ImGui::Dummy(ImVec2(0, 8));
+}
+
+void LorerMenu::RenderAimbotTab() {
+    ImGui::Columns(2, nullptr, false);
+    
+    RenderSection("Main Settings");
+    RenderToggle("Enable Aimbot", &m_Config.Aimbot.Enabled, 
+        "Автоматическое наведение на цель");
+    RenderToggle("Visible Check", &m_Config.Aimbot.VisibleCheck,
+        "Проверка видимости цели через стены");
+    RenderToggle("Auto Fire", &m_Config.Aimbot.AutoFire,
+        "Автоматическая стрельба при наведении");
+    
+    ImGui::Dummy(ImVec2(0, 10));
+    RenderSliderFloat("FOV", &m_Config.Aimbot.FOV, 1.0f, 360.0f, "%.0f°");
+    RenderSliderFloat("Smoothness", &m_Config.Aimbot.Smoothness, 1.0f, 20.0f);
+    RenderSliderFloat("Max Distance", &m_Config.Aimbot.MaxDistance, 10.0f, 500.0f, "%.0fm");
+    
+    ImGui::NextColumn();
+    
+    RenderSection("Target Selection");
+    RenderCombo("Target Bone", &m_Config.Aimbot.TargetBone, 
+        "Head\0Neck\0Chest\0Stomach\0Pelvis\0");
+    
+    ImGui::Dummy(ImVec2(0, 15));
+    RenderSection("Advanced");
+    RenderToggle("Prediction", &m_Config.Aimbot.AutoFire);
+    RenderToggle("Movement Compensation", &m_Config.Aimbot.AutoFire);
+    
+    ImGui::Columns(1);
+}
+
+void LorerMenu::RenderVisualsTab() {
+    ImGui::Columns(2, nullptr, false);
+    
+    RenderSection("Player ESP");
+    RenderToggle("Box ESP", &m_Config.Visuals.BoxESP);
+    RenderToggle("Skeleton ESP", &m_Config.Visuals.SkeletonESP);
+    RenderToggle("Health Bar", &m_Config.Visuals.HealthESP);
+    RenderToggle("Name ESP", &m_Config.Visuals.NameESP);
+    RenderToggle("Distance", &m_Config.Visuals.DistanceESP);
+    RenderToggle("Snaplines", &m_Config.Visuals.Snaplines);
+    
+    ImGui::Dummy(ImVec2(0, 10));
+    RenderSliderFloat("ESP Distance", &m_Config.Visuals.ESPDistance, 50.0f, 1000.0f, "%.0fm");
+    
+    ImGui::NextColumn();
+    
+    RenderSection("World Visuals");
+    RenderToggle("Radar", &m_Config.Visuals.Radar);
+    RenderToggle("Chams", &m_Config.Visuals.Chams);
+    RenderToggle("Night Mode", &m_Config.Visuals.NightMode);
+    
+    ImGui::Columns(1);
+}
+
+void LorerMenu::RenderMiscTab() {
+    ImGui::Columns(2, nullptr, false);
+    
+    RenderSection("Movement");
+    RenderToggle("Bunny Hop", &m_Config.Misc.BunnyHop);
+    RenderToggle("Auto Strafe", &m_Config.Misc.AutoStrafe);
+    RenderToggle("Speed Hack", &m_Config.Misc.SpeedHack);
+    if (m_Config.Misc.SpeedHack) {
+        RenderSliderFloat("Speed Multiplier", &m_Config.Misc.SpeedMultiplier, 1.0f, 5.0f, "%.1fx");
+    }
+    
+    ImGui::NextColumn();
+    
+    RenderSection("Combat");
+    RenderToggle("No Flash", &m_Config.Misc.NoFlash);
+    RenderToggle("No Recoil", &m_Config.Misc.NoRecoil);
+    RenderToggle("Rapid Fire", &m_Config.Misc.RapidFire);
+    RenderToggle("Infinite Ammo", &m_Config.Misc.InfiniteAmmo);
+    RenderToggle("God Mode", &m_Config.Misc.GodMode);
+    
+    ImGui::Columns(1);
+}
+
+void LorerMenu::RenderWeaponTab() {
+    ImGui::Columns(2, nullptr, false);
+    
+    RenderSection("Weapon Modifications");
+    RenderToggle("Instant Hit", &m_Config.Weapon.InstantHit);
+    RenderToggle("No Spread", &m_Config.Weapon.NoSpread);
+    RenderToggle("No Sway", &m_Config.Weapon.NoSway);
+    RenderToggle("Auto Aim", &m_Config.Weapon.AutoAim);
+    RenderToggle("Infinite Range", &m_Config.Weapon.InfiniteRange);
+    
+    ImGui::NextColumn();
+    
+    RenderSection("Damage");
+    RenderSliderFloat("Damage Multiplier", &m_Config.Weapon.DamageMultiplier, 1.0f, 10.0f, "%.1fx");
+    
+    ImGui::Columns(1);
+}
+
+void LorerMenu::RenderSettingsTab() {
+    RenderSection("Menu Settings");
+    
+    const char* keys[] = { "INSERT", "HOME", "END", "F1", "F2", "F3", "F4" };
+    int keyValues[] = { VK_INSERT, VK_HOME, VK_END, VK_F1, VK_F2, VK_F3, VK_F4 };
+    
+    int currentKeyIndex = 0;
+    for (int i = 0; i < IM_ARRAYSIZE(keyValues); i++) {
+        if (keyValues[i] == m_Config.MenuKey) {
+            currentKeyIndex = i;
+            break;
+        }
+    }
+    
+    if (ImGui::Combo("Menu Key", &currentKeyIndex, keys, IM_ARRAYSIZE(keys))) {
+        m_Config.MenuKey = keyValues[currentKeyIndex];
+    }
+    
+    ImGui::SliderFloat("Menu Alpha", &m_MenuAlpha, 0.1f, 1.0f, "%.1f");
+    
+    RenderSeparator();
+    
+    RenderSection("Configuration");
+    
+    if (ImGui::Button("Save Config", ImVec2(120, 30))) {
+        // SaveConfiguration();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Load Config", ImVec2(120, 30))) {
+        // LoadConfiguration();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Reset Default", ImVec2(120, 30))) {
+        m_Config = LorerConfig();
+    }
+}
+
+void LorerMenu::Render() {
+    if (!m_Config.MenuVisible) return;
+    
+    ImGui::SetNextWindowSize(ImVec2(650, 500), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiCond_FirstUseEver);
+    
+    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, m_MenuAlpha);
+    
+    if (ImGui::Begin("Lorer Menu", &m_Config.MenuVisible, 
+        ImGuiWindowFlags_NoCollapse | 
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoScrollWithMouse)) {
+        
+        RenderHeader();
+        RenderTabs();
+        
+        switch (m_CurrentTab) {
+            case 0: RenderAimbotTab(); break;
+            case 1: RenderVisualsTab(); break;
+            case 2: RenderMiscTab(); break;
+            case 3: RenderWeaponTab(); break;
+            case 4: RenderSettingsTab(); break;
+        }
+    }
+    ImGui::End();
+    
+    ImGui::PopStyleVar();
+}
+```
+
+6.4. Интеграция в основной цикл (CheatLogic.cpp)
+
+```cpp
+#include "LorerMenu.h"
+
+// Глобальный экземпляр меню
+LorerMenu g_LorerMenu;
+
+void CheatLogic::Render(OverlayRenderer* pRenderer) {
+    // Инициализация меню при первом вызове
+    static bool menuInitialized = false;
+    if (!menuInitialized) {
+        g_LorerMenu.Initialize();
+        menuInitialized = true;
+    }
+    
+    // Проверка горячей клавиши
+    static bool keyPressed = false;
+    if (GetAsyncKeyState(g_LorerMenu.GetConfig().MenuKey) & 1) {
+        g_LorerMenu.ToggleMenu();
+    }
+    
+    // Рендеринг меню Lorer
+    g_LorerMenu.Render();
+    
+    // Рендеринг ESP и других визуальных функций на основе конфигурации
+    auto& config = g_LorerMenu.GetConfig();
+    
+    if (config.Visuals.BoxESP || config.Visuals.SkeletonESP) {
+        RenderESP(pRenderer, config);
+    }
+    
+    if (config.Visuals.Radar) {
+        RenderRadar(pRenderer, config);
+    }
+}
+
+void CheatLogic::Update() {
+    auto& config = g_LorerMenu.GetConfig();
+    
+    // Обновление логики аимбота
+    if (config.Aimbot.Enabled) {
+        UpdateAimbot(config.Aimbot);
+    }
+    
+    // Обновление миск функций
+    if (config.Misc.BunnyHop) {
+        UpdateBunnyHop();
+    }
+    
+    if (config.Misc.NoRecoil) {
+        UpdateNoRecoil();
+    }
+}
+```
+
+6.5. Дополнительные визуальные эффекты меню
+
+```cpp
+// Эффект анимации появления
+void LorerMenu::RenderMenuAnimation() {
+    static float animationProgress = 0.0f;
+    
+    if (m_Config.MenuVisible && animationProgress < 1.0f) {
+        animationProgress += ImGui::GetIO().DeltaTime * 8.0f;
+        if (animationProgress > 1.0f) animationProgress = 1.0f;
+    } else if (!m_Config.MenuVisible && animationProgress > 0.0f) {
+        animationProgress -= ImGui::GetIO().DeltaTime * 8.0f;
+        if (animationProgress < 0.0f) animationProgress = 0.0f;
+    }
+    
+    // Применение ease-out анимации
+    float easedProgress = 1.0f - (1.0f - animationProgress) * (1.0f - animationProgress);
+    ImGui::GetStyle().Alpha = easedProgress;
+}
+
+// Эффект свечения для активных элементов
+void RenderGlowEffect(ImDrawList* drawList, ImVec2 pos, ImVec2 size, ImColor color) {
+    for (int i = 3; i > 0; i--) {
+        float alpha = (4 - i) * 0.1f;
+        ImColor glowColor(color.Value.x, color.Value.y, color.Value.z, alpha);
+        drawList->AddRect(
+            ImVec2(pos.x - i, pos.y - i),
+            ImVec2(pos.x + size.x + i, pos.y + size.y + i),
+            glowColor, 6.0f, 0, 1.0f
+        );
+    }
+}
+```
+
+6.6. Скриншот интерфейса Lorer
+
+Описание внешнего вида меню:
+- Фиолетовая тема (оттенки #8A2BE2 и #4B0082)
+- Закругленные углы всех элементов (6-8px)
+- Градиентный заголовок с логотипом "LORER Premium"
+- Табы: Aimbot, Visuals, Misc, Weapon, Settings
+- Кастомные тумблеры с фиолетовым цветом активации
+- Ползунки с фиолетовыми бегунками
+- Двухколоночный layout для оптимального использования пространства
+- Прозрачность окна регулируется в настройках
+- Размер окна: 650x500 пикселей
+- Поддержка анимации открытия/закрытия
+- Горячая клавиша INSERT для открытия меню 
