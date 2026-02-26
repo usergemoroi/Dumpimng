@@ -1,0 +1,57 @@
+# Build directories
+build/
+cmake-build-*/
+out/
+bin/
+lib/
+
+# IDE directories
+.idea/
+.vs/
+.vscode/
+*.code-workspace
+
+# Compiled files
+*.obj
+*.o
+*.exe
+*.dll
+*.lib
+*.a
+*.so
+*.dylib
+
+# Visual Studio files
+*.vcxproj
+*.vcxproj.*
+*.sln
+*.suo
+*.user
+*.sdf
+*.opensdf
+*.pdb
+*.ipch
+
+# CMake cache
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# ImGui configuration
+imgui.ini
+
+# Debug files
+*.log
+*.dmp
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
