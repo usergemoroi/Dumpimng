@@ -1,44 +1,79 @@
-# Lorer Menu
+# Lorer - Standoff 2 Cheat Framework
 
-A beautiful, modern ImGui-based menu for game modification tools. Features smooth animations, custom styling, and an intuitive user interface.
+A comprehensive game modification framework for Standoff 2 (v0.37.1) running on BlueStacks 5 emulator.
 
 ## Features
 
-- **Modern UI Design**: Dark theme with purple accent colors
-- **Animated Toggle Switches**: Smooth on/off animations
-- **Tabbed Interface**: Organized categories (Aimbot, Visuals, Misc, Settings)
-- **Color Pickers**: For ESP and overlay customization
-- **Configuration System**: Save and load configurations
-- **Watermark Display**: Optional watermark when menu is hidden
+### Aimbot
+- **Enable/Disable** - Toggle aimbot functionality
+- **FOV Control** - Adjustable field of view (0-360°)
+- **Smoothness** - Human-like aim movement
+- **Target Bone** - Head, Neck, Chest, Stomach
+- **Visible Check** - Only target visible enemies
+- **Silent Aim** - Stealthy targeting
+- **FOV Circle** - Visual indicator for aimbot range
 
-## Screenshots
+### Visuals (ESP)
+- **Box ESP** - Bounding boxes around players
+- **Health Bar** - Visual health indicator
+- **Name ESP** - Player names
+- **Distance ESP** - Distance in meters
+- **Skeleton ESP** - Player skeleton outline
+- **Snaplines** - Lines from screen to players
+- **Head Dot** - Indicator on head position
+- **Weapon ESP** - Current ammo display
+- **Color Customization** - Enemy, Team, Visible colors
+
+### Misc Features
+- **Bunny Hop** - Automatic jumping
+- **No Flash** - Remove flashbang effect
+- **FOV Changer** - Custom field of view
+- **Fake Lag** - Network manipulation
+- **Auto Strafe** - Automatic strafing
+
+### Settings
+- **Menu Hotkey** - INSERT/HOME/END/F1
+- **Stream Proof** - Hide from screen capture
+- **Auto-Update Offsets** - Automatic offset updates
+- **Config System** - Save/Load configurations
+
+## Memory Offsets (Standoff 2 v0.37.1)
+
+```cpp
+// GameManager
+constexpr uintptr_t GameManager_StaticInstance = 0x18;
+
+// PlayerManager
+constexpr uintptr_t PlayerManager_StaticInstance = 0x18;
+constexpr uintptr_t PlayerManager_LocalPlayer = 0x68;
+constexpr uintptr_t PlayerManager_PlayerList = 0x38;
+
+// PlayerController
+constexpr uintptr_t PlayerController_Health = 0x150;
+constexpr uintptr_t PlayerController_Team = 0x154;
+constexpr uintptr_t PlayerController_MovementController = 0x98;
+constexpr uintptr_t PlayerController_IsVisible = 0x1A0;
+
+// MovementController
+constexpr uintptr_t MovementController_TranslationData = 0xB0;
+
+// TranslationData
+constexpr uintptr_t TranslationData_Position = 0x1C;
+```
+
+## Project Structure
 
 ```
-┌─────────────────────────────────────────────────┐
-│  LORER                              [Close]     │
-├─────────────────────────────────────────────────┤
-│ [Aimbot] [Visuals] [Misc] [Settings]            │
-├─────────────────────────────────────────────────┤
-│                                                 │
-│  Main Settings                                  │
-│  ────────────────────────────────────────────   │
-│                                                 │
-│  ⬤─● Enable Aimbot                              │
-│                                                 │
-│  FOV: ═════════════●═══════════════  90.0°      │
-│  Smoothness: ═══════●════════════════  5.0      │
-│  Target Bone: [Head ▼]                          │
-│                                                 │
-│  Additional Options                             │
-│  ────────────────────────────────────────────   │
-│                                                 │
-│  ⬤─● Visible Check                              │
-│  ⬤──○ Silent Aim                                │
-│  ⬤─● Draw FOV Circle                            │
-│                                                 │
-├─────────────────────────────────────────────────┤
-│  Lorer v1.0 | Made with <3 | Standoff 2 v0.37.1 │
-└─────────────────────────────────────────────────┘
+LorerMenu/
+├── DllMain.cpp           # DLL entry point with DirectX hooks
+├── MemoryManager.h/cpp   # Memory operations and game data access
+├── CheatFeatures.h/cpp   # Aimbot, ESP, and other cheat features
+├── LorerMenu.h/cpp       # ImGui menu implementation
+├── LorerOverlay.h        # Overlay management
+├── LorerIntegration.h    # Integration utilities
+├── Offsets.h             # Game memory offsets
+├── CMakeLists.txt        # Build configuration
+└── README.md             # This file
 ```
 
 ## Building
@@ -46,157 +81,97 @@ A beautiful, modern ImGui-based menu for game modification tools. Features smoot
 ### Prerequisites
 
 - CMake 3.16+
-- Visual Studio 2022 or compatible C++ compiler
+- Visual Studio 2022 (MSVC)
+- Windows 10/11 SDK
 - DirectX 11 SDK
-- ImGui (docking branch recommended)
-- MinHook (optional, for hooking)
 
-### Setup
+### Dependencies
 
-1. Clone the repository
-2. Download ImGui and extract to `external/imgui/`
-3. (Optional) Download MinHook and extract to `external/minhook/`
-4. Build with CMake:
+1. **ImGui** - Download from https://github.com/ocornut/imgui
+   - Extract to `external/imgui/`
+   - Use docking branch for best results
+
+2. **MinHook** - Download from https://github.com/TsudaKageyu/minhook
+   - Extract to `external/minhook/`
+   - Required for DirectX hooking
+
+### Build Commands
 
 ```bash
 mkdir build
 cd build
-cmake ..
+cmake .. -DBUILD_DLL=ON -DBUILD_DEMO=OFF
 cmake --build . --config Release
 ```
 
-### Project Structure
-
-```
-LorerMenu/
-├── LorerMenu.h          # Menu configuration structures and class
-├── LorerMenu.cpp        # Menu implementation
-├── LorerOverlay.h       # Overlay management class
-├── LorerIntegration.h   # Integration utilities
-├── LorerDemo.cpp        # Standalone demo application
-├── CMakeLists.txt       # CMake build configuration
-└── README.md            # This file
-```
+Output: `Lorer.dll` for injection into HD-Player.exe
 
 ## Usage
 
-### Standalone Demo
+### Injection
 
-Run `LorerDemo.exe` to see the menu in action without a game.
+1. Start BlueStacks 5
+2. Launch Standoff 2
+3. Use a DLL injector to inject `Lorer.dll` into `HD-Player.exe`
+4. Press **INSERT** to toggle the menu
 
-### Integration into Your Project
+### Menu Navigation
 
-```cpp
-#include "LorerIntegration.h"
+- **INSERT** - Toggle menu visibility
+- **Mouse** - Navigate and interact with menu
+- **Left Click** - Toggle options, drag sliders
 
-// In your DirectX Present hook:
-HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags) {
-    LorerIntegration::OnPresent(pSwapChain);
-    return oPresent(pSwapChain, SyncInterval, Flags);
-}
+### Configuration
 
-// In DllMain:
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved) {
-    switch (reason) {
-    case DLL_PROCESS_ATTACH:
-        // Initialize and install hooks...
-        break;
-    case DLL_PROCESS_DETACH:
-        LorerIntegration::Shutdown();
-        break;
-    }
-    return TRUE;
-}
-```
+Configurations are stored in the same directory as the DLL. Use the Settings tab to save/load configurations.
 
-### Accessing Menu Settings
+## Technical Details
 
-```cpp
-#include "LorerOverlay.h"
+### DirectX 11 Hooking
 
-// Check if aimbot is enabled
-bool aimbotEnabled = Lorer::LorerOverlay::GetInstance()
-    .GetMenu().GetAimbotConfig().enabled;
+The framework hooks `IDXGISwapChain::Present` to render the ImGui overlay. This is done by:
 
-// Get ESP settings
-const auto& espConfig = Lorer::LorerOverlay::GetInstance()
-    .GetMenu().GetVisualsConfig();
+1. Creating a temporary swap chain
+2. Getting the Present function address from the vtable
+3. Using MinHook to create a detour
+4. Rendering ImGui before calling the original Present
 
-if (espConfig.espEnabled) {
-    // Draw ESP with colors
-    auto enemyColor = espConfig.enemyColor.ToImU32();
-    // ...
-}
-```
+### Memory Access
 
-## Configuration
+Memory is accessed through standard Windows APIs:
+- `ReadProcessMemory` for reading game data
+- `WriteProcessMemory` for modifying game data
+- Pattern scanning for dynamic address resolution
 
-### Aimbot Settings
+### ESP Rendering
 
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| enabled | bool | false | Enable/disable aimbot |
-| fov | float | 90.0 | Field of view for targeting |
-| smoothness | float | 5.0 | Aim smoothness (1-30) |
-| targetBone | int | 0 | Target bone index |
-| visibleCheck | bool | true | Check if target is visible |
-| silentAim | bool | false | Silent aim mode |
-| drawFOV | bool | true | Draw FOV circle |
-| fovColor | Color | Purple | FOV circle color |
+ESP is rendered using ImGui's background draw list, which allows drawing on top of the game without interfering with the rendering pipeline.
 
-### Visuals Settings
+## Anti-Detection
 
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| espEnabled | bool | false | Enable ESP |
-| boxESP | bool | true | Draw bounding boxes |
-| healthESP | bool | true | Show health bars |
-| nameESP | bool | true | Show player names |
-| distanceESP | bool | true | Show distance |
-| skeletonESP | bool | false | Draw skeleton |
-| snaplines | bool | false | Draw snaplines |
-| enemyColor | Color | Red | Enemy color |
-| teamColor | Color | Green | Teammate color |
+The framework includes several anti-detection measures:
 
-### Misc Settings
+1. **String Obfuscation** - Encrypted strings
+2. **Random Delays** - Human-like timing
+3. **Memory Protection** - VirtualProtect usage
+4. **Stream Proof** - Optional screen capture avoidance
 
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| bunnyHop | bool | false | Auto bunny hop |
-| noFlash | bool | false | Remove flash effect |
-| radar | bool | false | Show enemies on radar |
-| fovChanger | bool | false | Enable FOV changer |
-| fovValue | int | 90 | Custom FOV value |
+## Disclaimer
 
-## Customization
-
-### Changing Colors
-
-Edit `LorerMenu.cpp` in the `ApplyStyle()` function to customize the theme:
-
-```cpp
-// Main accent color (purple)
-colors[ImGuiCol_Button] = ImVec4(0.56f, 0.19f, 0.96f, 0.50f);
-
-// Background color
-colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.08f, 0.12f, 0.95f);
-```
-
-### Adding New Features
-
-1. Add configuration struct in `LorerMenu.h`
-2. Add UI rendering in the appropriate tab function
-3. Access settings via `GetMenu().GetYourConfig()`
-
-## License
-
-This project is provided for educational purposes only.
+This software is provided for **educational and research purposes only**. Using game modifications in online games may violate the terms of service and result in account bans. The authors are not responsible for any misuse of this software.
 
 ## Credits
 
 - ImGui by Omar Cornut
 - MinHook by Tsuda Kageyu
+- Game reverse engineering community
 
-## Disclaimer
+## License
 
-This software is intended for educational and research purposes only. Use at your own risk. The authors are not responsible for any misuse of this software.
+This project is for educational purposes. Use at your own risk.
+
+---
+
+**Version:** 1.0.0  
+**Target:** Standoff 2 v0.37.1  
+**Platform:** BlueStacks 5 (Windows)
