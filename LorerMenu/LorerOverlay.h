@@ -14,7 +14,7 @@ namespace Lorer {
             return instance;
         }
 
-        bool Initialize(HWND hWnd, ID3D11Device* pDevice, ID3D11DeviceContext* pContext) {
+        bool Initialize(HWND hWnd, ID3D11Device* pDevice, ID3d11DeviceContext* pContext) {
             if (m_initialized) return true;
 
             m_hWnd = hWnd;
