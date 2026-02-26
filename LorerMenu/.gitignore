@@ -1,0 +1,58 @@
+# Build directories
+Build/
+Output/
+build/
+cmake-build-*/
+x64/
+x86/
+Debug/
+Release/
+Win32/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.sln.docstates
+*.obj
+*.pch
+*.pdb
+*.ilk
+*.log
+*.tlog
+*.idb
+*.ipch
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.scc
+
+# Compiled files
+*.exe
+*.dll
+*.lib
+*.exp
+
+# ImGui config
+imgui.ini
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# External libraries (downloaded)
+external/imgui/*.cpp
+external/imgui/*.h
+external/imgui/backends/*.cpp
+external/imgui/backends/*.h
+external/minhook/lib/*.lib
